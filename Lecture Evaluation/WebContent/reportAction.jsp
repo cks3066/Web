@@ -25,14 +25,22 @@
 		script.println("</script>");
 		script.close();
 		return;
-	
 	}
-	boolean emailChecked = userDAO.getUserEmailChecked(userID);
-	if(emailChecked == true) {
+	
+	request.setCharacterEncoding("UTF-8");
+	String reportTitle = null;
+	String reportContent = null;
+	if(request.getParameter("reportTitle") != null) {
+		reportTitle = request.getParameter("reportTitle");
+	}
+	if(request.getParameter("reportContent") != null) {
+		reportContent = request.getParameter("reportContent");
+	}
+	if(reportTitle == null || reportContent == null) {
 		PrintWriter script = response.getWriter();
 		script.println("<script>");
-		script.println("alert('이미 인증 된 회원입니다.');");
-		script.println("location.href = 'index.jsp';");
+		script.println("alert('입력이 안 된 사항이 있습니다.');");
+		script.println("history.back();");
 		script.println("</script>");
 		script.close();
 		return;
@@ -40,11 +48,12 @@
 	
 	String host = "http://localhost:8080/Lecture_Evaluation/";
 	String from = "tmdcks2130@gmail.com";
-	String to = userDAO.getUserEmail(userID);
-	String subject = "강의평가를 위한 이메일 인증 메일입니다.";
-	String content = "다음 링크에 접속하여 이메일 인증을 진행하세요." +
-		"<a href='" + host + "emailCheckAction.jsp?code=" + new SHA256().getSHA256(to) + "'>이메일인증하기</a>";
-
+	String to = "cks3066@naver.com";
+	String subject = "강의평가 사이트에서 접수된 신고 메일입니다.";
+	String content = "신고자: " + userID + 
+					"<br>제목: " + reportTitle + 
+					"<br>내용: " + reportContent;
+					
 	Properties p = new Properties();
 	p.put("mail.smtp.user", from);
 	p.put("mail.smtp.host", "smtp.googlemail.com");
@@ -77,8 +86,16 @@
 		script.println("</script>");
 		script.close();
 		return;
-	}
+	} 
 %>
+<%
+PrintWriter script = response.getWriter();
+script.println("<script>");
+script.println("alert('정상적으로 신고되었습니다.');");
+script.println("history.back();");
+script.println("</script>");
+script.close();		
+%> 
 <!DOCTYPE html>
 <html>
 <head>

@@ -1,5 +1,57 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.io.PrintWriter" %>
+<%@ page import="user.UserDAO"%>
+<%@ page import="evaluation.EvaluationDAO"%>
+<%@ page import="likey.LikeyDTO"%>
+<%@ page import="java.io.PrintWriter"%>
+<%
+	String userID = null;
+	if(session.getAttribute("userID") != null) {
+		userID = (String) session.getAttribute("userID");
+	}
+	if (userID == null) {
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('로그인을 해주세요.');");
+		script.println("location.href = 'userLogin.jsp';");
+		script.println("</script>");
+		script.close();
+		return;
+	}
+	
+	request.setCharacterEncoding("UTF-8");
+	String evaluationID = null;
+	if(request.getParameter("evaluationID") != null) {
+		evaluationID = request.getParameter("evaluationID");
+	}
+	EvaluationDAO evaluationDAO = new EvaluationDAO();
+	if(userID.equals(evaluationDAO.getUserID(evaluationID))) {
+		int result = new EvaluationDAO().delete(evaluationID);
+		if(result == 1) {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('삭제가 완료되었습니다.');");
+			script.println("location.href = 'index.jsp';");
+			script.println("</script>");
+			script.close();
+			return;
+		} else {
+			PrintWriter script = response.getWriter();
+			script.println("<script>");
+			script.println("alert('데이터베이스 오류가 발생했습니다.');");
+			script.println("history.back();");
+			script.println("</script>");
+			script.close();
+			return;
+		}
+	} else {
+		PrintWriter script = response.getWriter();
+		script.println("<script>");
+		script.println("alert('자신이 쓴 글만 삭제 가능합니다.');");
+		script.println("history.back();");
+		script.println("</script>");
+		script.close();
+	}
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,21 +64,6 @@
 	<link rel="stylesheet" href="./css/custom.css">
 </head>
 <body>
-<%
-	String userID = null;
-	if(session.getAttribute("userID") != null) {
-		userID = (String) session.getAttribute("userID");
-	}
-	if(userID == null) {
-		PrintWriter script = response.getWriter();
-		script.println("<script>");
-		script.println("alert('로그인을 해주세요.');");
-		script.println("location.href = 'index.jsp';");
-		script.println("</script>");
-		script.close();
-		return;
-	}
-%>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 	<a class="navbar-brand" href="index.jsp">강의평가 웹 사이트</a>
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
@@ -64,11 +101,12 @@
 	</div>
 	</nav>
 	<section class="container mt-3" style="max-width: 560px">
-		<div class="alert alert-warning mt-4" role="alert">
-			이메일 주소 인증을 하셔야 이용 가능합니다. 인증 메일을 받지 못하셨나요?
+		<div class="alert alert-success mt-4" role="alert">
+			이메일 주소 인증 메일이 전송되었습니다. 
+			회원가입시 입력했던 이메일에 들어가셔서 인증해주세요.
 		</div>
-		<a href="emailSendAction.jsp" class="btn btn-primary">인증 메일 다시 받기</a>
 	</section>
+
 	<footer class="bg-dark mt-4 p-5 text-center" style="color: #FFFFFF;">
 		Copyright &copy; 2021 온승찬 All Rights Reserved.
 	</footer>
